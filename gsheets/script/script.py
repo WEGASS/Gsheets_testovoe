@@ -1,21 +1,22 @@
+import os
+import time
 from datetime import datetime
 import pandas as pd
 import gspread
 import requests
+import schedule
 import xmltodict
 from gsheets.models import Contract
 
-
 gc = gspread.service_account(filename='gsheets/script/service_account.json')
-sh = gc.open_by_url(
-    'https://docs.google.com/spreadsheets/d/1p3YOopCH996XAShh8Op7M6lb184rE7D5xjHJiYzmLNs/edit?usp=sharing')
-worksheet = sh.worksheet("Лист1")
+sh = gc.open_by_url(os.getenv('GSHEETS_URL'))
+worksheet = sh.worksheet(os.getenv('GSHEETS_LIST'))
 
 
 def get_exchange_rate():
-    '''
+    """
     Returns today exchange rate of pair Rub-USD
-    '''
+    """
     response = requests.get('https://www.cbr.ru/scripts/XML_daily.asp')
     data = xmltodict.parse(response.text)['ValCurs']['Valute']
     for valute in data:
@@ -23,8 +24,42 @@ def get_exchange_rate():
             return float(valute['Value'].replace(',', '.'))
 
 
-def get_table(worksheet):
-    df = pd.DataFrame(worksheet.get_all_records())
+def cached(func):
+    """
+    Wrapper for saving last list of dates
+    """
+    cache = {'order_list': []}
+
+    def wrapper(orders_list):
+        if orders_list != cache['order_list']:
+            cache['order_list'] = orders_list
+            func(orders_list)
+        else:
+            return
+    return wrapper
+
+
+@cached
+def telegram_bot_sendtext(orders_list):
+    bot_token = os.getenv('BOT_TOKEN')
+    url = 'https://api.telegram.org/bot' + bot_token + '/sendMessage'
+    bot_chat_id = os.getenv('CHAT_ID')
+    bot_message = 'Сроки поставок вышли у следующих заказов: \n' + '\n'.join(orders_list)
+    params = {'chat_id': bot_chat_id,
+              'parse_mode': 'Markdown',
+              'text': bot_message
+              }
+    response = requests.get(url, params=params)
+    return response.json()['ok']
+
+
+def get_overdue():
+    overdue_list = Contract.objects.filter(delivery_date__lt=datetime.now().date()).values_list('number', flat=True)
+    return overdue_list
+
+
+def get_table(sheet):
+    df = pd.DataFrame(sheet.get_all_records())
     return df
 
 
@@ -58,6 +93,19 @@ def refresh_table(df):
     print(f"End syncing with GoogleSheets in {datetime.now()}")
 
 
+def do_all():
+    try:
+        table = get_table(worksheet)
+        refresh_table(table)
+        telegram_bot_sendtext(get_overdue())
+    except Exception as error:
+        print("Caught error in GSheets script.")
+        print(error)
+
+
 def main():
-    table = get_table(worksheet)
-    refresh_table(table)
+    do_all()
+    schedule.every(os.getenv('SCHEDULE_TIME')).minutes.do(do_all)  # Run every 'n' minutes
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

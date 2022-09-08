@@ -37,5 +37,10 @@ services:
       - POSTGRES_NAME=test
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - GSHEETS_URL=https://docs.google.com/spreadsheets/d/1p3YOopCH996XAShh8Op7M6lb184rE7D5xjHJiYzmLNs/edit?usp=sharing
+      - GSHEETS_LIST=Лист1
+      - BOT_TOKEN=12XXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXX
+      - CHAT_ID=72XXXXXXX
+      - SCHEDULE_TIME=5
     depends_on:
       - db
