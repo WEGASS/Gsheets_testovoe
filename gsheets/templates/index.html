@@ -1,0 +1,91 @@
+{%extends 'base.html'%}
+{%block 'title'%}
+<style>
+  .tableFixHead          { overflow: auto; height: 500px; }
+  .tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+
+  /* Just common table stuff. Really. */
+  table  { border-collapse: collapse; width: 100%; }
+  th, td { padding: 8px 16px; }
+  th     { background:#eee; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+
+<nav class="navbar navbar-light" style="background-color: #e3f2fd; margin-bottom: 20px;">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <img src="https://xn--80aaglqhjo4aie.xn--p1ai/wp-content/themes/kanalservis/images/svg/logo.svg" alt="" width="300" height="100">
+    </a>
+  </div>
+</nav>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <canvas id="chart" width="50" height="50"></canvas>
+    </div>
+    <div class="col">
+        <table class="table table-bordered text-center mx-auto" style="margin-bottom: 30px; width: 150px;">
+          <thead class="table-dark">
+            <tr>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-size: 24px">{{ price_sum | floatformat:0  }} $</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tableFixHead">
+          <table class="text-center">
+            <thead>
+            <tr>
+              <th scope="col">№</th>
+              <th scope="col">заказ №</th>
+              <th scope="col">стоимость,$</th>
+              <th scope="col">срок поставки</th>
+              <th scope="col">стоимость в руб.</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for contract in contracts %}
+              <tr>
+                <th scope="row">{{contract.id}}</th>
+                <td>{{contract.number}}</td>
+                <td>{{contract.price | floatformat:0 }}</td>
+                <td>{{contract.delivery_date | date:'Y-m-d'}}</td>
+                <td>{{contract.price_in_rub | floatformat:2  }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let ctx = document.getElementById("chart").getContext("2d");
+  let chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+       labels: [{% for date in dates %}"{{ date.delivery_date | date:'Y-m-d' }}",{% endfor %}],
+       datasets: [
+          {
+            label: "Стоимость по дням ($)",
+            backgroundColor: "#79AEC8",
+            borderColor: "#417690",
+            data: [{% for date in dates %}parseFloat({{ date.price__sum }}),{% endfor %}]
+          }
+       ]
+    },
+    options: {
+       title: {
+          text: "Стоимость по дням",
+          display: true
+       }
+    }
+  });
+</script>
+{%endblock%}
