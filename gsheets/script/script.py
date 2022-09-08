@@ -47,7 +47,7 @@ def telegram_bot_sendtext(orders_list):
     bot_token = os.getenv('BOT_TOKEN')
     url = 'https://api.telegram.org/bot' + bot_token + '/sendMessage'
     bot_chat_id = os.getenv('CHAT_ID')
-    bot_message = 'Сроки поставок вышли у следующих заказов: \n' + '\n'.join(orders_list)
+    bot_message = 'Сроки поставок вышли у следующих заказов: \n' + '\n'.join([str(n) for n in orders_list])
     params = {'chat_id': bot_chat_id,
               'parse_mode': 'Markdown',
               'text': bot_message
@@ -100,14 +100,9 @@ def refresh_table(df):
 
 
 def do_all():
-    try:
-        table = get_table(worksheet)
-        refresh_table(table)
-        telegram_bot_sendtext(get_overdue())
-    except Exception as error:
-        print("Caught error in GSheets script.")
-        print(error)
-
+    table = get_table(worksheet)
+    refresh_table(table)
+    telegram_bot_sendtext(get_overdue())
 
 def main():
     do_all()
