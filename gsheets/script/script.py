@@ -31,7 +31,7 @@ def cached(func):
     cache = {'order_list': []}
 
     def wrapper(orders_list):
-        if orders_list != cache['order_list']:
+        if set(orders_list) != set(cache['order_list']):
             cache['order_list'] = orders_list
             func(orders_list)
         else:
