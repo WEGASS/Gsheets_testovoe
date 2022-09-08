@@ -25,6 +25,7 @@ services:
       - POSTGRES_NAME=test
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - PYTHONUNBUFFERED=1
     depends_on:
       - db
   script:
@@ -42,5 +43,6 @@ services:
       - BOT_TOKEN=12XXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXX
       - CHAT_ID=72XXXXXXX
       - SCHEDULE_TIME=5
+      - PYTHONUNBUFFERED=1
     depends_on:
       - web
