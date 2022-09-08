@@ -102,7 +102,12 @@ def refresh_table(df):
 def do_all():
     table = get_table(worksheet)
     refresh_table(table)
-    telegram_bot_sendtext(get_overdue())
+    try:
+        telegram_bot_sendtext(get_overdue())
+    except Exception as error:
+        print('Error with TG credentials')
+        print(error)
+
 
 def main():
     do_all()
