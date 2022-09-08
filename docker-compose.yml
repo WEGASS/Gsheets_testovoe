@@ -12,7 +12,10 @@ services:
       - POSTGRES_PASSWORD=postgres
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "
+      python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000
+      "
     volumes:
       - .:/app
     restart: always
@@ -26,10 +29,7 @@ services:
       - db
   script:
     build: .
-    command: bash -c "
-      python manage.py migrate
-      && python manage.py start_script
-      "
+    command: python manage.py start_script
     volumes:
       - .:/app
     restart: always
@@ -43,4 +43,4 @@ services:
       - CHAT_ID=72XXXXXXX
       - SCHEDULE_TIME=5
     depends_on:
-      - db
+      - web

@@ -26,7 +26,7 @@ def get_exchange_rate():
 
 def cached(func):
     """
-    Wrapper for saving last list of dates
+    Wrapper for saving last list of orders with overdue (to avoid resending)
     """
     cache = {'order_list': []}
 
@@ -41,6 +41,9 @@ def cached(func):
 
 @cached
 def telegram_bot_sendtext(orders_list):
+    """
+    Send all orders with overdue in Telegram chat
+    """
     bot_token = os.getenv('BOT_TOKEN')
     url = 'https://api.telegram.org/bot' + bot_token + '/sendMessage'
     bot_chat_id = os.getenv('CHAT_ID')
@@ -54,6 +57,9 @@ def telegram_bot_sendtext(orders_list):
 
 
 def get_overdue():
+    """
+    Get all orders with overdue
+    """
     overdue_list = Contract.objects.filter(delivery_date__lt=datetime.now().date()).values_list('number', flat=True)
     return overdue_list
 
@@ -105,7 +111,7 @@ def do_all():
 
 def main():
     do_all()
-    schedule.every(os.getenv('SCHEDULE_TIME')).minutes.do(do_all)  # Run every 'n' minutes
+    schedule.every(int(os.getenv('SCHEDULE_TIME'))).minutes.do(do_all)  # Run every 'n' minutes
     while True:
         schedule.run_pending()
         time.sleep(1)
