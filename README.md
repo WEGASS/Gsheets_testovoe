@@ -8,6 +8,7 @@
 
 ![image](https://user-images.githubusercontent.com/37272928/189197695-70a313f1-379d-443f-a18b-b65bccd06300.png)
 
+Сам скрипт лежит в папке ./gsheets/script/
 
 Ссылка на Google таблицу (доступ открыт):
 https://docs.google.com/spreadsheets/d/1p3YOopCH996XAShh8Op7M6lb184rE7D5xjHJiYzmLNs/edit?usp=sharing
