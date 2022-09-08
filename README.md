@@ -15,7 +15,7 @@
 https://docs.google.com/spreadsheets/d/1p3YOopCH996XAShh8Op7M6lb184rE7D5xjHJiYzmLNs/edit?usp=sharing
 
 
-#Запуск приложения без Docker:
+**Запуск приложения без Docker:**
 1. Клонировать репозиторий
 2. Установить необходимые библиотеки pip install -r requirements.txt
 3. Изменить настройки БД в settings.py
