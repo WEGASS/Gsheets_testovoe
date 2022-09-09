@@ -86,14 +86,10 @@ def refresh_table(df):
         )
         # Change record in db if something changed in GoogleSheets
         if not created:
-            if contract.number != df.loc[i, 'заказ №'] or contract.price != df.loc[
-                i, 'стоимость,$'] or contract.delivery_date != df.loc[
-                i, 'срок поставки'] or contract.price_in_rub != price_in_rub:
-                contract.number = df.loc[i, 'заказ №']
-                contract.price = df.loc[i, 'стоимость,$']
-                contract.delivery_date = datetime.strptime(df.loc[i, 'срок поставки'], '%d.%m.%Y').strftime('%Y-%m-%d')
-                contract.price_in_rub = price_in_rub
-                contract.save()
+            current_row = Contract(pk=df.loc[i, '№'], number=df.loc[i, 'заказ №'], price=df.loc[
+                i, 'стоимость,$'], delivery_date=datetime.strptime(df.loc[i, 'срок поставки'], '%d.%m.%Y').date(), price_in_rub=price_in_rub)
+            if current_row != contract:
+                current_row.save()
     # Delete old records
     numbers = list(df['№'].values)
     Contract.objects.exclude(id__in=numbers).delete()
